@@ -7,6 +7,7 @@ use warnings;
 use Linux::Prctl::Securebits;
 use Linux::Prctl::CapabilityBoundingSet;
 use Linux::Prctl::CapabilitySet;
+use Linux::Prctl::CapabilityAmbSet;
 
 our $VERSION = '1.6.0';
 
@@ -26,12 +27,13 @@ our %EXPORT_TAGS = (
    'functions' => \@from_xs,
 );
 
-our (%securebits, %capbset, %cap_effective, %cap_inheritable, %cap_permitted);
+our (%securebits, %capbset, %cap_effective, %cap_inheritable, %cap_permitted, %cap_ambient);
 tie %securebits, 'Linux::Prctl::Securebits';
 tie %capbset, 'Linux::Prctl::CapabilityBoundingSet';
 tie %cap_effective, 'Linux::Prctl::CapabilitySet', constant('CAP_EFFECTIVE');
 tie %cap_inheritable, 'Linux::Prctl::CapabilitySet', constant('CAP_INHERITABLE');
 tie %cap_permitted, 'Linux::Prctl::CapabilitySet', constant('CAP_PERMITTED');
+tie %cap_ambient, 'Linux::Prctl::CapabilityAmbSet';
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{constants} },
                    @{ $EXPORT_TAGS{functions} },
@@ -341,6 +343,16 @@ program whose associated file capabilities grant that capability).
 This is a set of capabilities preserved across an execve. It provides a
 mechanism for a process to assign capabilities to the permitted set of the new
 program during an execve.
+
+=head3 Ambient (the %Linux::Prctl::cap_ambient hash):
+
+This is a set of new capabilities preserved across an setuid. It provides a
+mechanism for a process to assign capabilities to the permitted set of the new
+program during a setuid.
+example:
+        $Linux::Prctl::cap_inheritable{NET_ADMIN} = 1;
+        $Linux::Prctl::cap_ambient{NET_ADMIN} = 1;
+        $Linux::Prctl::securebits{keep_caps};
 
 =head3 Effective (the %Linux::Prctl::cap_effective hash):
 

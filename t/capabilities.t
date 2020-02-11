@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 291;
+use Test::More tests => 362;
 use Linux::Prctl qw(:constants);
 
 use POSIX qw(setlocale LC_ALL);
@@ -12,6 +12,7 @@ my %new_caps = ("syslog" => 1, "wake_alarm" => 1);
 is(defined(tied %Linux::Prctl::cap_permitted), 1, "Have a tied cap_permitted object");
 is(defined(tied %Linux::Prctl::cap_effective), 1, "Have a tied cap_effective object");
 is(defined(tied %Linux::Prctl::cap_inheritable), 1, "Have a tied cap_inheritable object");
+is(defined(tied %Linux::Prctl::cap_ambient), 1, "Have a tied cap_ambiant object");
 my $R = $< ? 0 : 1;
 for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
     SKIP: {
@@ -19,6 +20,7 @@ for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
         $_ = lc($_);
         eval {
             my $ign = $Linux::Prctl::cap_permitted{$_};
+	    my $amb = $Linux::Prctl::cap_ambient{$_};
             1;
         } or do {
             if($@ =~ /Invalid argument|has not defined/ && exists($new_caps{$_})) {
@@ -41,5 +43,12 @@ for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
         is($Linux::Prctl::cap_permitted{$_}, $R, "Checking whether $_ is set to $R in cap_permitted");
         $Linux::Prctl::cap_permitted{$_} = 1;
         is($Linux::Prctl::cap_permitted{$_}, $R, "Checking whether $_ is set to $R in cap_permitted");
+
+        $Linux::Prctl::cap_ambient{$_} = 0;
+        is($Linux::Prctl::cap_ambient{$_}, $R, "Checking whether $_ is set to $R in cap_permitted");
+        $Linux::Prctl::cap_ambient{$_} = 1;
+        is($Linux::Prctl::cap_ambient{$_}, $R, "Checking whether $_ is set to $R in cap_permitted");
+
+	
     }
 }

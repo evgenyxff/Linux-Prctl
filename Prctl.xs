@@ -335,3 +335,35 @@ set_cap(flag, cap, val)
         RETVAL = isset;
     OUTPUT:
         RETVAL
+
+int
+cap_ambset(cap, val)
+    int cap
+    int val
+    CODE:
+	RETVAL = prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0);
+    OUTPUT:
+        RETVAL
+
+int
+cap_ambget(cap)
+    int cap
+    CODE:
+       RETVAL = prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_IS_SET, cap, 0, 0);
+    OUTPUT:
+       RETVAL
+
+int
+cap_ambdrop(cap)
+    int cap
+    CODE:
+       RETVAL = prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_LOWER, cap, 0, 0);
+    OUTPUT:
+       RETVAL
+
+int
+cap_ambdropall()
+    CODE:
+       RETVAL = prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0);
+    OUTPUT:
+       RETVAL
